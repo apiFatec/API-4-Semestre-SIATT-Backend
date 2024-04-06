@@ -3,6 +3,8 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { UserRegisterDTO } from './DTO/user.register.dto';
 import { ResultDTO } from 'src/dto/result.dto';
+import { FindOneOptions } from 'typeorm';
+import * as bcrypt  from 'bcrypt'
 
 @Injectable()
 export class UserService {
@@ -18,7 +20,7 @@ export class UserService {
     let user = new User()
     user.email = data.email
     user.name = data.name
-    user.password = data.password
+    user.password = bcrypt.hashSync(data.password,8)
     return this.userRepository.save(user)
     .then((result) => {
       return<ResultDTO>{
@@ -32,6 +34,12 @@ export class UserService {
         message: "Ocorreu algum erro durante a criação de usuário!"
       }
     })
+    
   }
-  
+  async findOne(email: string): Promise<User | undefined> {
+    const options: FindOneOptions<User> = {
+      where: { email: email },
+    };
+    return this.userRepository.findOne(options);
+  }
 }
