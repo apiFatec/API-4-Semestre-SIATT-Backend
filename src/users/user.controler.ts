@@ -4,11 +4,16 @@ import { User } from './user.entity';
 import { UserRegisterDTO } from './DTO/user.register.dto';
 import { ResultDTO } from 'src/dto/result.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('usuario')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService,
+    private authService: AuthService
+  ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Get('listar')
   async list(): Promise<User[]> {
     return this.userService.findAll();
@@ -22,6 +27,6 @@ export class UserController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Request() req) {
-    return req.user
+    return this.authService.login(req.user)
   }
 }
