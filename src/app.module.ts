@@ -1,12 +1,25 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/user.module';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TokenModule } from './token/token.module';
+require('dotenv').config();
 
 @Module({
-  imports: [AuthModule],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [TypeOrmModule.forRoot({
+    type: process.env.TYPEORM_CONNECTION,
+    port: Number(process.env.TYPEORM_PORT),
+    host: process.env.TYPEORM_HOST,
+    database: process.env.TYPEORM_DATABASE,
+    username: process.env.TYPEORM_USERNAME,
+    password: process.env.TYPEORM_PASSWORD,
+    entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    synchronize: true,
+  } as TypeOrmModuleOptions),
+  UserModule,
+  TokenModule,
+],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

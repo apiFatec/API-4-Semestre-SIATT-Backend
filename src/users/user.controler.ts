@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './user.entity';
 import { UserRegisterDTO } from './DTO/user.register.dto';
@@ -24,9 +24,23 @@ export class UserController {
     return this.userService.register(data);
   }
 
-  @UseGuards(AuthGuard('local'))
+  // @UseGuards(AuthGuard('local'))
   @Post('login')
   async login(@Request() req) {
-    return this.authService.login(req.user)
-  }
-}
+    console.log("User:", req.user);
+    const { email, password } = req.body;
+    if (email && password) {
+      const authenticationResult = await this.authService.authenticate(email, password);
+      if (authenticationResult) {
+        return authenticationResult;
+      } else {
+        throw new HttpException({
+          message: "Invalid credentials.",
+        }, HttpStatus.UNAUTHORIZED);
+      }
+    } else {
+      throw new HttpException({
+        message: "Email and password are required.",
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }}

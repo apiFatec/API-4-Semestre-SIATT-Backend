@@ -5,11 +5,12 @@ import { UserRegisterDTO } from './DTO/user.register.dto';
 import { ResultDTO } from 'src/dto/result.dto';
 import { FindOneOptions } from 'typeorm';
 import * as bcrypt  from 'bcrypt'
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UserService {
   constructor(
-    @Inject('USER_REPOSITORY')
+    @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
 
@@ -36,10 +37,9 @@ export class UserService {
     })
     
   }
-  async findOne(email: string): Promise<User | undefined> {
-    const options: FindOneOptions<User> = {
-      where: { email: email },
-    };
+  async findOne(email: string,): Promise<User | undefined> {
+    console.log("Email:", email);
+    const options: FindOneOptions<User> = { where: { email: email }};
     return this.userRepository.findOne(options);
   }
 }
