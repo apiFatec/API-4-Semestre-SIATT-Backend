@@ -6,7 +6,6 @@ import { LocalStrategy } from './local.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './jwt.strategy';
 import { TokenModule } from 'src/token/token.module';
-import { ZoomApiService } from 'src/zoom/zoom.service';
 require('dotenv').config();
 
 console.log(process.env.JWT_TOKEN)

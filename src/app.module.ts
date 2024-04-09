@@ -4,8 +4,7 @@ import { UserModule } from './users/user.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { TokenModule } from './token/token.module';
 import { MeetingsController } from './meetings/meetings.controller';
-import { MeetingsService } from './meetings/meetings.service';
-import { ZoomApiService } from './zoom/zoom.service';
+import { ZoomService } from './zoom/zoom.service';
 require('dotenv').config();
 
 @Module({
@@ -23,13 +22,6 @@ require('dotenv').config();
   TokenModule,
 ],
   controllers: [MeetingsController],
-  providers: [MeetingsService, ZoomApiService, {
-    provide: 'API_KEY', 
-    useValue: '1uX2ISuaTxGA6e3uh0p7JQ', 
-  },
-  {
-    provide: 'API_SECRET',
-    useValue: '3z042sJwSzyiaDjWELbGbQ', 
-  }],
+  providers: [ZoomService],
 })
 export class AppModule {}

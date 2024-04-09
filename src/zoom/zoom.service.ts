@@ -1,51 +1,51 @@
-import { Inject, Injectable } from '@nestjs/common';
-import axios, { AxiosInstance } from 'axios';
-import * as jwt from 'jsonwebtoken';
+import { Injectable } from '@nestjs/common';
+import axios from 'axios';
+require('dotenv').config();
 
 @Injectable()
-export class ZoomApiService {
-  private readonly baseUrl = 'https://api.zoom.us/v2';
-  private instance: AxiosInstance;
+export class ZoomService {
+  private readonly zoomApiBaseUrl = 'https://api.zoom.us/v2';
 
-  constructor(
-    @Inject('API_KEY') apiKey: string,
-    @Inject('API_SECRET') apiSecret: string,
-  ) {
-    const accessToken = this.generateAccessToken(apiKey, apiSecret);
-    this.instance = axios.create({
-      baseURL: this.baseUrl,
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
-  }
-
-  public async generateAccessToken(apiKey: string, apiSecret: string): Promise<string> {
-    const payload = {
-      iss: apiKey,
-      exp: Date.now() + 3600,
-    };
-
-    const token = jwt.sign(payload, apiSecret);
-    console.log(token)
-    return token;
-  }
-
-  public async createMeeting(startTime: Date, meetingDetails: any): Promise<any> {
+  async createMeeting(topic: string): Promise<any> {
     try {
-      const response = await this.instance.post(
-        '/users/me/meetings',
-        meetingDetails,
+      const accessToken = await this.getToken();
+      console.log('Access Token:', accessToken);
+      const response = await axios.post(
+        `${this.zoomApiBaseUrl}/users/me/meetings`,
+        {
+          topic,
+          type: 2,
+        },
         {
           headers: {
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
           },
-        },
+        }
       );
 
       return response.data;
     } catch (error) {
-      console.error('Error creating meeting:', error.response?.data || error.message);
+      console.error('Erro ao criar a reunião:', error.response?.data || error.message);
+      throw error;
+    }
+  }
+
+  private async getToken(): Promise<string> {
+    try {
+      const response = await axios.post('https://zoom.us/oauth/token', 
+        `grant_type=client_credentials&client_id=${process.env.ZOOM_CLIENT_ID}&client_secret=${process.env.ZOOM_CLIENT_SECRET}`,
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        });
+
+      const accessToken = response.data.access_token;
+      console.log('Access Token:', accessToken);
+
+      return accessToken;
+    } catch (error) {
+      console.error('Erro ao obter o token de acesso:', error.response?.data || error.message);
       throw error;
     }
   }
