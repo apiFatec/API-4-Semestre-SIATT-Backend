@@ -1,36 +1,34 @@
-import { Controller, Post, Body, Get, Query, Redirect } from '@nestjs/common';
-import { MeetingsService } from './meetings.service';
+import { Controller, Get, Query, Redirect, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ZoomService } from 'src/zoom/zoom.service';
 
 @Controller('meetings')
 export class MeetingsController {
   constructor(private readonly zoomService: ZoomService) {}
 
-    @Get('authorize')
-    @Redirect('https://zoom.us/oauth/authorize?response_type=code&client_id=4wYTcnqGRYSWytTTBOoTYw&redirect_uri=http://localhost:3000/meetings/callback')
-    authorize() {
+  @Get('authorize')
+  @Redirect(
+    'https://zoom.us/oauth/authorize?response_type=code&client_id=4wYTcnqGRYSWytTTBOoTYw&redirect_uri=http://localhost:3000/meetings/callback',
+  )
+  async authorize() {}
+
+  @Get('callback')
+  async handleAuthorizationCallback(
+    @Query('code') code: string,
+    @Res() res: Response,
+  ) {
+    try {
+      console.log('Code:', code);
+      const accessToken = await this.zoomService.getAccessToken(code);
+      console.log('Access Token:', accessToken);
+
+        return res.status(200).json({ accessToken });
+    } catch (error) {
+      console.error(
+        'Erro ao obter o token de acesso:',
+        error.response?.data || error.message,
+      );
+      return res.redirect('http://localhost:5173/error');
     }
-
-    @Get('callback')
-async handleAuthorizationCallback(@Query('code') code: string, @Query('state') state: string) {
-  try {
-    const params = new URLSearchParams(state);
-    const topic = params.get('topic');
-    const startDate = params.get('start_date');
-    const durationString = params.get('duration');
-
-    const duration = parseInt(durationString);
-
-    const accessToken = await this.zoomService.getAccessToken(code);
-    console.log('Access Token:', accessToken);
-
-    const meeting = await this.zoomService.createMeeting(topic, startDate, duration, accessToken);
-
-    return { success: true, meeting };
-  } catch (error) {
-    console.error('Erro ao obter o token de acesso ou criar a reunião:', error.response?.data || error.message);
-    return { success: false, error: 'Erro ao criar a reunião' };
   }
 }
-  }
-   

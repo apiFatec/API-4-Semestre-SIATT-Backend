@@ -6,7 +6,12 @@ require('dotenv').config();
 export class ZoomService {
   private readonly zoomApiBaseUrl = 'https://api.zoom.us/v2';
 
-  async createMeeting(topic: string, startDate: string, duration: number, accessToken: string): Promise<any> {
+  async createMeeting(
+    topic: string,
+    startDate: string,
+    duration: number,
+    accessToken: string,
+  ): Promise<any> {
     try {
       console.log('Access Token:', accessToken);
       const response = await axios.post(
@@ -21,12 +26,15 @@ export class ZoomService {
           headers: {
             Authorization: `Bearer ${accessToken}`,
           },
-        }
+        },
       );
-  
+
       return response.data;
     } catch (error) {
-      console.error('Erro ao criar a reunião:', error.response?.data || error.message);
+      console.error(
+        'Erro ao criar a reunião:',
+        error.response?.data || error.message,
+      );
       throw error;
     }
   }
@@ -35,9 +43,12 @@ export class ZoomService {
     try {
       const requestBody = new URLSearchParams();
       requestBody.append('grant_type', 'authorization_code');
-      console.log(code)
+      console.log(code);
       requestBody.append('code', code);
-      requestBody.append('redirect_uri', 'http://localhost:3000/meetings/callback');
+      requestBody.append(
+        'redirect_uri',
+        'http://localhost:3000/meetings/callback',
+      );
 
       const response = await axios.post(
         'https://zoom.us/oauth/token',
@@ -45,15 +56,17 @@ export class ZoomService {
         {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic NHdZVGNucUdSWVNXeXRUVEJPb1RZdzpkQ3BNSXlWQXc2ZzZ4YThUSmtNcUYyREY2bFNvN1BXbA==`,
+            Authorization: `Basic NHdZVGNucUdSWVNXeXRUVEJPb1RZdzpkQ3BNSXlWQXc2ZzZ4YThUSmtNcUYyREY2bFNvN1BXbA==`,
           },
-        }
+        },
       );
 
-      console.log(response.data.access_token);
       return response.data.access_token;
     } catch (error) {
-      console.error('Erro ao obter o token de acesso:', error.response?.data || error.message);
+      console.error(
+        'Erro ao obter o token de acesso:',
+        error.response?.data || error.message,
+      );
       throw error;
     }
   }
