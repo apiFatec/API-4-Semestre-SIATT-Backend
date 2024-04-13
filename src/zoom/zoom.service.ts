@@ -4,7 +4,11 @@ require('dotenv').config();
 
 @Injectable()
 export class ZoomService {
+  private refreshToken: string;
+  private readonly clientId = '4wYTcnqGRYSWytTTBOoTYw';
+  private readonly clientSecret = 'dCpMIyVAw6g6xa8TJkMqF2DF6lSo7PWl';
   private readonly zoomApiBaseUrl = 'https://api.zoom.us/v2';
+  private accessTokenExpirationTime: number
 
   async createMeeting(
     topic: string,
@@ -60,7 +64,8 @@ export class ZoomService {
           },
         },
       );
-
+      
+      this.refreshToken = response.data.refresh_token;
       return response.data.access_token;
     } catch (error) {
       console.error(
@@ -69,5 +74,25 @@ export class ZoomService {
       );
       throw error;
     }
+  }
+
+  isAccessTokenValid(): boolean {
+    const currentTime = new Date().getTime();
+    return currentTime < this.accessTokenExpirationTime;
+  }
+
+  async refreshAccessToken(): Promise<string> {
+    const response = await axios.post(
+      'https://zoom.us/oauth/token',
+      `grant_type=refresh_token&refresh_token=${this.refreshToken}`,
+      {
+        headers: {
+          'Authorization': `Basic ${Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64')}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      },
+    );
+
+    return response.data.access_token;
   }
 }

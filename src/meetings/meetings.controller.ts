@@ -22,7 +22,7 @@ export class MeetingsController {
       const accessToken = await this.zoomService.getAccessToken(code);
       console.log('Access Token:', accessToken);
 
-        return res.status(200).json({ accessToken });
+      return res.redirect(`http://localhost:5173/NovaReuniao?accessToken=${accessToken}`);
     } catch (error) {
       console.error(
         'Erro ao obter o token de acesso:',
