@@ -3,6 +3,7 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './users/user.module';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { TokenModule } from './token/token.module';
+import { Api4SemModule } from './api-4-sem/api-4-sem.module';
 require('dotenv').config();
 
 @Module({
@@ -18,6 +19,7 @@ require('dotenv').config();
   } as TypeOrmModuleOptions),
   UserModule,
   TokenModule,
+  Api4SemModule,
 ],
   controllers: [],
   providers: [],
